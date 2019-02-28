@@ -1,5 +1,9 @@
-export default class Photo {
+export default class Cell {
     public tags: string[];
+    public y: number;
+    public t: String;
+    public y: number;
+    public t: String;
     public busy: Boolean;
 
     constructor(x: number, y: number, t: String) {

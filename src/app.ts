@@ -3,7 +3,7 @@ import * as readLine from "readline";
 const createInterface = readLine.createInterface;
 const createReadStream = fs.createReadStream;
 
-import Cell from "./Cell";
+import Cell from "./Photo";
 import Pizza from "./Pizza";
 
 const files: string[] = ["example", "small", "medium", "big"];
