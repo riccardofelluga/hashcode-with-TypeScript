@@ -1,11 +1,13 @@
 import Cell from './Cell';
+import * as os from "os";
+const EOL = os.EOL;
 
 export default class Pizza {
-	public rows: Number;
-	public cols: Number;
-	public l: Number;
-	public max: Number;
-	public cells: Cell[];
+	public rows: number;
+	public cols: number;
+	public l: number;
+	public max: number;
+	public cells: Cell[][];
 	public all: Cell[];
 	public slices: Cell[];
 	constructor() {

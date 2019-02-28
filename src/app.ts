@@ -2,14 +2,13 @@ import * as fs from "fs";
 import * as readLine from "readline";
 const createInterface = readLine.createInterface;
 const createReadStream = fs.createReadStream;
-import * as os from "os";
-const EOL = os.EOL;
+
 import Cell from "./Cell";
 import Pizza from "./Pizza";
 
 const files: string[] = ["example", "small", "medium", "big"];
 
-const file: string = files[process.argv.length > 2 ? parseInt(process.argv[2]) : 3];
+const file: string = files[process.argv.length > 2 ? parseInt(process.argv[2]) : 2];
 
 const lineReader: readLine.Interface = createInterface({
   input: createReadStream("in/" + file + ".in")
@@ -37,15 +36,14 @@ function readDescLine(line: String) :void {
   pizza.max = parseInt(values[3], 10);
 }
 
-function readPizzaLine(line: String) :void {
+function readPizzaLine(line: String) {
   var pieces: String[] = line.split("");
-  pizza.cells.push(
-    pieces.map((piece, x) => {
-      const cell = new Cell(x, pizza.cells.length, piece);
-      pizza.all.push(cell);
-      return cell;
-    })
-  );
+  const piecesParsed: Cell[] = pieces.map((piece: String, x: number): Cell => {
+    const cell: Cell = new Cell(x, pizza.cells.length, piece);
+    pizza.all.push(cell);
+    return cell;
+  });
+  pizza.cells.push(piecesParsed);
 }
 
 function start(): void {

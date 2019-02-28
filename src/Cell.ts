@@ -1,10 +1,10 @@
 export default class Cell {
-    public x: Number;
-    public y: Number;
-    public t: Number;
+    public x: number;
+    public y: number;
+    public t: String;
     public busy: Boolean;
-    
-    constructor(x: Number, y: Number, t: Number) {
+
+    constructor(x: number, y: number, t: String) {
       this.x = x;
       this.y = y;
       this.t = t;
