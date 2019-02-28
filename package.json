@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A boilerplate for working with TypeScript and Nodejs. Includes linting, prettifier, jest for testing, Docker, CI from CircleCI etc.",
   "main": "index.js",
-  "author": "Claudio Spiess",
+  "author": "Claudio Spiess and Riccardo Felluga",
   "license": "MIT",
   "dependencies": {
     "@typescript-eslint/parser": "^1.1.0",
@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@types/jest": "^23.3.13",
-    "@types/node": "^10.12.18",
+    "@types/node": "^10.12.27",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
     "jest": "^24.0.0",
