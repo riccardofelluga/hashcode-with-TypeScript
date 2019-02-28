@@ -1,15 +1,18 @@
-export default class Cell {
-    public tags: string[];
-    public y: number;
-    public t: String;
-    public y: number;
-    public t: String;
-    public busy: Boolean;
+export default class Photo {
+  public tags: string[];
+  public orientation: string;
+  public numTags: number;
+  public photoId: number;
 
-    constructor(x: number, y: number, t: String) {
-      this.x = x;
-      this.y = y;
-      this.t = t;
-      this.busy = false;
-    }
+  constructor(
+    tags: string[],
+    numTags: number,
+    orientation: string,
+    photoId: number
+  ) {
+    this.tags = tags;
+    this.orientation = orientation;
+    this.numTags = numTags;
+    this.photoId = photoId;
   }
+}
