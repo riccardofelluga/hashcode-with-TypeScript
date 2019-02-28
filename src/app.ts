@@ -1,110 +1,142 @@
 import * as fs from "fs";
 import * as readLine from "readline";
+import * as _ from "lodash";
 const createInterface = readLine.createInterface;
 const createReadStream = fs.createReadStream;
 
-import Cell from "./Cell";
-import Pizza from "./Pizza";
+import Slide from "./Slide";
+import Photo from "./Photo";
+import Slideshow from "./Slideshow";
+import SlideHelper from "./SlideHelper";
 
-const files: string[] = ["example", "small", "medium", "big"];
+const files: string[] = [
+  "a_example",
+  "b_lovely_landscapes",
+  "c_memorable_moments",
+  "d_pet_pictures",
+  "e_shiny_selfies"
+];
 
-const file: string = files[process.argv.length > 2 ? parseInt(process.argv[2]) : 2];
+const file: string =
+  files[process.argv.length > 2 ? parseInt(process.argv[2]) : 0];
 
 const lineReader: readLine.Interface = createInterface({
-  input: createReadStream("in/" + file + ".in")
+  input: createReadStream("in/" + file + ".txt")
 });
 
-var pizza: Pizza = new Pizza();
+var slideshow: Slideshow = new Slideshow([]);
+var allPhotos: Photo[] = [];
+var count: number = 0;
 
-var count: Number = 0;
+lineReader.on("line", readSlideshow);
 
-lineReader.on("line", readPizza);
-
-function readPizza(line): void
-{
-    if (count === 0) readDescLine(line);
-    else readPizzaLine(line);
-    count++;
-    if (count === 1 + pizza.rows) start();
+function readSlideshow(line): void {
+  if (count === 0) readDescLine(line);
+  else readPhotoLine(line, count - 1);
+  count++;
+  if (count === 1 + slideshow.num) start();
 }
 
-function readDescLine(line: String) :void {
-  var values = line.split(" ");
-  pizza.rows = parseInt(values[0], 10);
-  pizza.cols = parseInt(values[1], 10);
-  pizza.l = parseInt(values[2], 10);
-  pizza.max = parseInt(values[3], 10);
+function readDescLine(line: string): void {
+  slideshow.num = parseInt(line, 10);
 }
 
-function readPizzaLine(line: String) {
-  var pieces: String[] = line.split("");
-  const piecesParsed: Cell[] = pieces.map((piece: String, x: number): Cell => {
-    const cell: Cell = new Cell(x, pizza.cells.length, piece);
-    pizza.all.push(cell);
-    return cell;
-  });
-  pizza.cells.push(piecesParsed);
+function readPhotoLine(line: string, count: number) {
+  let pieces: string[] = line.split(" ");
+  let orientation: string = pieces[0];
+  let numTags: number = parseInt(pieces[1], 10);
+  var tags: string[] = [];
+  pieces.forEach(
+    (line: string, index: number): void => {
+      if (index < 2) return;
+      tags.push(line);
+    }
+  );
+  if (numTags !== tags.length) console.log("Tiakane");
+  let photo: Photo = new Photo(tags, numTags, orientation, count);
+  allPhotos.push(photo);
 }
 
 function start(): void {
-  var mushrooms = pizza.all.filter(c => c.t === "M").length;
-  var tomatoes = pizza.all.length - mushrooms;
-  console.log("mushrooms/tomatoes", mushrooms, tomatoes);
-  var divs = [];
-  for (var i = pizza.max; i >= pizza.l * 2; i--) {
-    divs = divs.concat(divisors(i));
+  var vQueue: Photo = null;
+  var slides: Slide[] = [];
+  allPhotos.forEach((photo: Photo, index: number) => {
+    if (photo.orientation === "V") {
+      if (vQueue != null) {
+        slides.push(new Slide([vQueue, photo]));
+        vQueue = null;
+      } else {
+        vQueue = photo;
+      }
+    } else {
+      slides.push(new Slide([photo]));
+    }
+  });
+  let slideHelper: SlideHelper = new SlideHelper();
+  let chunkedSlides = _.chunk(slides, 10);
+  var allPairs = [];
+  var goodPairs = [];
+  var pairedchunkedSlides = chunkedSlides.forEach(x =>
+    allPairs.push(pairwise(x))
+  );
+  console.log("All pairs: ", allPairs);
+  allPairs.forEach(x => {
+    // if (x == undefined || x[0] == undefined || x[1] == undefined) return;
+
+    if (slideHelper.interestBetween(x[0][0], x[0][1]) > 0) {
+      console.log("x0", x[0]);
+      console.log("x1", x[1]);
+      goodPairs.push(x);
+    }
+  });
+  console.log("Chunks: ", goodPairs);
+
+  // console.log(slides);
+  // console.log("Interest: ", slideHelper.interestBetween(slides[1], slides[0]));
+  slideshow = new Slideshow(slides);
+  while (slides.length > 0) {
+    var current: Slide = slides.pop();
+    slideshow.slides.push(current);
+    var bestFit: Slide = null;
+    var intrest: Number = 0;
+    slides.forEach((item: Slide) => {
+      var newIntrest: Number = slideHelper.interestBetween(current, item);
+      if (newIntrest >= intrest) {
+        intrest = newIntrest;
+        bestFit = item;
+      }
+    });
+    _.remove(slides, bestFit);
+    slideshow.slides.push(bestFit);
   }
 
-  pizza.all.forEach(cell => {
-    divs.forEach(d => {
-      var w = d[0];
-      var h = d[1];
-      pizza.takeSlice(cell, w, h);
-    });
-  });
-
-  points();
   write();
 }
 
+function pairwise(list) {
+  if (list.length < 2) {
+    return [];
+  }
+  var first = _.first(list),
+    rest = _.drop(list, 1),
+    pairs = _.map(rest, function(x) {
+      return [first, x];
+    });
+  return _.flatten([pairs, pairwise(rest)]);
+}
+
 function points(): void {
-  console.log("points", pizza.all.filter(c => c.busy).length, pizza.all.length);
+  // console.log("points", pizza.all.filter(c => c.busy).length, pizza.all.length);
 }
 
 function write(): void {
-  var out = `${pizza.slices.length}`;
-  pizza.slices.forEach(slice => {
-    out = `${out}
-${slice.out.join(" ")}`;
+  // console.log(slideshow.slides);
+  var out = `${slideshow.slides.length}`;
+  slideshow.slides.forEach(slide => {
+    out += `\n${slide.photos[0].photoId}`;
+    if (slide.photos.length > 1) {
+      out += ` ${slide.photos[1].photoId}`;
+    }
   });
   fs.writeFile(`out/${file}.out`, out, () => {});
-}
-
-
-function divisors(n) {
-  var c = [];
-  var map = {};
-  for (var i = 1; i < n; i++) {
-    if (n % i === 0) {
-      var f = i;
-      var s = n / i;
-      if (!map[`${f}-${s}`]) {
-        map[`${f}-${s}`] = true;
-        c.push([f, s]);
-      }
-      if (!map[`${s}-${f}`]) {
-        map[`${s}-${f}`] = true;
-        c.push([s, f]);
-      }
-    }
-  }
-  return c;
-}
-
-function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
 }
