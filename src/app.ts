@@ -100,14 +100,18 @@ function start(): void {
     var bestFit: Slide = null;
     var intrest: Number = 0;
     slides.forEach((item: Slide) => {
+      console.log(item);
       var newIntrest: Number = slideHelper.interestBetween(current, item);
+      console.log(newIntrest);
       if (newIntrest >= intrest) {
         intrest = newIntrest;
         bestFit = item;
       }
+      console.log(intrest);
     });
     _.remove(slides, bestFit);
     slideshow.slides.push(bestFit);
+    console.log(slides.length);
   }
 
   write();
